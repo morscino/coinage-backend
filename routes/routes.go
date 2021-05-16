@@ -17,8 +17,8 @@ func (c CoinRoute) CoinRoutes(router *gin.Engine) {
 	CoinsGroup := router.Group("/coins")
 	{
 		CoinsGroup.GET("/", c.CoinFacade.StoreCoin)
-
 		CoinsGroup.GET("/all", c.CoinFacade.GetCoins)
+		CoinsGroup.GET("/:symbol", c.CoinFacade.GetCoinBySymbol)
 
 	}
 

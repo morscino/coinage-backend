@@ -5,8 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/getsentry/sentry-go"
+	"github.com/google/uuid"
 	"github.com/imroc/req"
+	"github.com/morscino/gigo/model/coinmodel"
 	"github.com/morscino/gigo/service/coinservice"
 )
 
@@ -36,15 +37,15 @@ type CoinResponse struct {
 }
 
 type CoinHandler struct {
-	CoinRepository coinservice.CoinRepository
+	CoinService coinservice.CoinRepository
 }
 
 func NewCoinHandler(c coinservice.CoinRepository) CoinHandler {
-	return CoinHandler{CoinRepository: c}
+	return CoinHandler{CoinService: c}
 }
 
 func (c CoinHandler) RunCron(d time.Duration, t int) {
-	//now := time.Time()
+
 	c.storeCoin(t)
 	//Run every 30 seconds
 	for x := range time.Tick(d) {
@@ -59,7 +60,38 @@ func (c CoinHandler) caller(x time.Time, t int) {
 
 func (c CoinHandler) storeCoin(t int) {
 	//get all coins
-	//allCoins := c.GetCoins()
+	allCoins := c.GetCoins()
+
+	for _, singleCoin := range allCoins {
+		id := uuid.New()
+		coin := coinmodel.Coin{
+			ID:                 id,
+			Symbol:             singleCoin.Symbol,
+			PriceChange:        singleCoin.PriceChange,
+			PriceChangePercent: singleCoin.PriceChangePercent,
+			WeightedAvgPrice:   singleCoin.WeightedAvgPrice,
+			PrevClosePrice:     singleCoin.PrevClosePrice,
+			LastPrice:          singleCoin.LastPrice,
+			LastQty:            singleCoin.LastQty,
+			BidPrice:           singleCoin.BidPrice,
+			AskPrice:           singleCoin.AskPrice,
+			AskQty:             singleCoin.AskQty,
+			OpenPrice:          singleCoin.OpenPrice,
+			HighPrice:          singleCoin.HighPrice,
+			LowPrice:           singleCoin.LowPrice,
+			Volume:             singleCoin.Volume,
+			QuoteVolume:        singleCoin.QuoteVolume,
+			OpenTime:           singleCoin.OpenTime,
+			CloseTime:          singleCoin.CloseTime,
+			FirstId:            singleCoin.FirstId,
+			LastId:             singleCoin.LastId,
+			Count:              singleCoin.Count,
+			CreatedAt:          time.Now(),
+		}
+
+		c.CoinService.StoreCoin(coin)
+
+	}
 	fmt.Printf("Coins stored after %v seconds \n", t)
 	//return allCoins
 }
@@ -76,9 +108,17 @@ func (c CoinHandler) GetCoins() []CoinResponse {
 	}
 
 	if err := resp.ToJSON(&response); err != nil {
-		sentry.CaptureException(err)
+		//sentry.CaptureException(err)
+		log.Fatal(err)
 		//return 0, err
 	}
 
 	return response
+}
+
+func (c CoinHandler) GetCoinBySymbol(symbol string) *[]coinmodel.Coin {
+	var coin *coinmodel.Coin
+	result := c.CoinService.GetCoinBySymbol(symbol, coin)
+
+	return &result
 }
