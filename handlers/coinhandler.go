@@ -2,13 +2,14 @@ package handlers
 
 import (
 	"fmt"
-	"log"
+
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/imroc/req"
 	"github.com/morscino/gigo/model/coinmodel"
 	"github.com/morscino/gigo/service/coinservice"
+	"github.com/morscino/gigo/utility/log"
 )
 
 var response []CoinResponse
@@ -103,14 +104,15 @@ func (c CoinHandler) GetCoins() []CoinResponse {
 
 	resp, err := req.Get(url)
 	if err != nil {
-		log.Fatal(err)
-		//return 0, err
+		log.Error("Error fetching data: %v", err.Error())
+		//fmt.Println(err)
+
 	}
 
 	if err := resp.ToJSON(&response); err != nil {
-		//sentry.CaptureException(err)
-		log.Fatal(err)
-		//return 0, err
+		//fmt.Println(err)
+		log.Error("Error binding data: %v", err.Error())
+
 	}
 
 	return response

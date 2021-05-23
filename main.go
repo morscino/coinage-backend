@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -37,9 +38,17 @@ func main() {
 
 	CoinRepo := coinservice.NewCoinService(db)
 	CoinHandler := handlers.NewCoinHandler(CoinRepo)
-	CoinFacade := *facade.NewCoinFacade(ctx, CoinHandler)
+	CoinFacade := *facade.NewCoinFacade(CoinHandler, ctx)
 
 	c := routes.NewCoinRoute(CoinFacade)
 	c.CoinRoutes(server)
-	server.Run(":" + "7000")
+
+	if config.App.Port == "" {
+		config.App.Port = "7000"
+	}
+
+	if err := server.Run(fmt.Sprintf(":%s", config.App.Port)); err != nil {
+
+		log.Error("main run: %v", err)
+	}
 }

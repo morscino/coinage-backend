@@ -15,7 +15,7 @@ type CoinFacade struct {
 	CoinHandler handlers.CoinHandler
 }
 
-func NewCoinFacade(ctx context.Context, ch handlers.CoinHandler) *CoinFacade {
+func NewCoinFacade(ch handlers.CoinHandler, ctx context.Context) *CoinFacade {
 	return &CoinFacade{
 		ctx:         ctx,
 		CoinHandler: ch,
@@ -23,9 +23,9 @@ func NewCoinFacade(ctx context.Context, ch handlers.CoinHandler) *CoinFacade {
 }
 
 func (coin CoinFacade) StoreCoin(c *gin.Context) {
+	// Sore coin data with go routine
+	go coin.CoinHandler.RunCron(30000*time.Millisecond, 30000/1000)
 
-	coin.CoinHandler.RunCron(30000*time.Millisecond, 20000/1000)
-	c.JSON(http.StatusOK, gin.H{"data": "coin stored"})
 }
 
 func (coin CoinFacade) GetCoins(c *gin.Context) {

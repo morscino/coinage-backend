@@ -14,6 +14,7 @@ func NewCoinRoute(cf facade.CoinFacade) *CoinRoute {
 }
 
 func (c CoinRoute) CoinRoutes(router *gin.Engine) {
+
 	CoinsGroup := router.Group("/coins")
 	{
 		CoinsGroup.GET("/", c.CoinFacade.StoreCoin)
